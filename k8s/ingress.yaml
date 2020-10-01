@@ -1,0 +1,23 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: uploader-backend-ingress
+  namespace: acessa
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`uploader-api.acessa.cloud`) && PathPrefix(`/`)
+      services:
+        - kind: Service
+          name: uploader-backend-service
+          namespace: acessa
+          passHostHeader: true
+          port: 80
+          responseForwarding:
+            flushInterval: 1ms
+          scheme: http
+          strategy: RoundRobin
+          weight: 10

@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uploader-backend-deployment
+  namespace: acessa
+  labels:
+    name: uploader-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: uploader-backend
+  template:
+    metadata:
+      labels:
+        name: uploader-backend
+    spec:
+      imagePullSecrets:
+        - name: dkrreg-acessa-cloud
+      containers:
+        - name: uploader-backend
+          image: registry.digitalocean.com/acessa-cloud/uploader-backend:1.0.0
+          envFrom:
+            - configMapRef:
+                name: uploader-backend-config
+          ports:
+            - name: http
+              containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: uploader-backend
+  name: uploader-backend-service
+  namespace: acessa
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    name: uploader-backend
+  type: ClusterIP
