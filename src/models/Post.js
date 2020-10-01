@@ -4,7 +4,14 @@ const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
 
-const s3 = new aws.S3();
+
+const s3 = new aws.S3({
+  endpoint: process.env.SPACES_ENDPOINT,
+  accessKeyId: process.env.SPACES_KEY,
+  secretAccessKey: process.env.SPACES_SECRET,
+  region: process.env.SPACES_REGION,
+  signatureVersion: 'v4'
+});
 
 const PostSchema = new mongoose.Schema({
   name: String,
@@ -19,7 +26,10 @@ const PostSchema = new mongoose.Schema({
 
 PostSchema.pre("save", function() {
   if (!this.url) {
-    this.url = `${process.env.APP_URL}/files/${this.key}`;
+    this.url = `${process.env.APP_URL}/files/${encodeURIComponent(this.key)}`;
+  }
+  if(process.env.STORAGE_TYPE === "s3" && process.env.SPACES_CDN) {
+    this.url = this.url.replaceAll(process.env.SPACES_ENDPOINT, process.env.SPACES_CDN);
   }
 });
 
