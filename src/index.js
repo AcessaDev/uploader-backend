@@ -30,3 +30,5 @@ app.use(
 app.use(require("./routes"));
 
 app.listen(3000);
+
+console.log("Service is up and running...")
